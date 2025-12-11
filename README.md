@@ -1,5 +1,5 @@
 # Telegram 多机器人托管平台，一键安装/卸载(安装后默认开启自启后台运行)
-```
+```bash
 bash <(curl -Ls https://raw.githubusercontent.com/jyucoeng/tg_bot_platform/refs/heads/v2.0.2/setup.sh)
 ```
 > 一键部署，轻松管理多个 Telegram 客服机器人
@@ -14,7 +14,7 @@ bash <(curl -Ls https://raw.githubusercontent.com/jyucoeng/tg_bot_platform/refs/
 
 - 🤖 **多机器人管理** - 一个平台管理无数个客服机器人
 - 💬 **双模式支持** - 直接转发模式 / 话题群组模式
-- 🔐 **智能验证** - 5种验证码类型，有效防止垃圾消息
+- 🔐 **智能验证** - 6种验证码类型，有效防止垃圾消息  （新增CF验证模式）
 - 📣 **自定义欢迎语** - SQLite 数据库存储，支持自动备份   （新增）
 - 📊 **用户管理** - 查看、拉黑、解除拉黑用户
 - 💾 **数据持久化** - SQLite 数据库存储，支持自动备份
@@ -126,7 +126,27 @@ Bot: 📋 黑名单列表：
 
 你: /ub 111111
 Bot: ✅ 已将用户 111111 从黑名单移除
+
 ```
+
+**场景4：切换验证场景**
+
+<img width="940" height="472" alt="image" src="https://github.com/user-attachments/assets/b926e008-eb09-4076-8c4f-2d8c47b9c278" />
+
+<img width="950" height="200" alt="image" src="https://github.com/user-attachments/assets/18783de2-24a5-4192-96f2-1abe755e26dd" />
+
+<img width="966" height="690" alt="image" src="https://github.com/user-attachments/assets/5fea6ade-486b-4f6e-b3a9-5e43bed839f9" />
+
+<img width="409" height="544" alt="image" src="https://github.com/user-attachments/assets/950625fe-d2cb-418b-bf15-bdc64c51f63c" />
+
+
+```
+文字版教程：
+ /start—>点击“我的机器人”—>进入你的机器人名字—>点击验证设置—>可切换简单验证或者cf验证
+
+```
+
+
 
 ## 👑 管理员功能
 
@@ -202,7 +222,7 @@ Bot: ✅ 已将用户 111111 从黑名单移除
 ### 获取帮助
 
 - 📖 查看完整文档（本README）
-- [感谢开发者](https://t.me/SerokBot_bot)
+- [感谢开发者](https://t.me/doraemon0000000001Bot)
 
 ### 报告问题
 
@@ -225,10 +245,33 @@ MIT License - 自由使用，保留版权声明
 
 ## 🎯 版本信息
 
-- **当前版本**: v2.0
+- **当前版本**: v2.0.2
 - **更新日期**: 2025-11-18
 - **数据库版本**: SQLite 3
 - **Python版本**: 3.11+
+
+
+- v2.0.1 
+ 1. 完成版
+
+- v2.0.2 
+  1. 增加cf验证（用于防止广告分子跳过机器人平台 直接往bot塞广告）
+
+
+## 机器人平台如何从2.0.1升级到v2.0.2？
+1.首先运行v2.0.1的sh脚本中的手动备份，备份成功后，卸载平台。然后运行v2.0.2的安装脚本，输入相关安装参数。然后再手动从菜单里选择手动恢复数据的选项，选仅恢复数据（菜单第一个）。
+
+2.相关参数获取：
+ 2.1、CF中绑定A记录，打开小黄云。
+ 2.2、CF中点击进入域名，左侧菜单进入"规则"--->"页面规则"，选“Origin Rules”，创建域名端口的回源（如果你步骤1的参数中域名配置的不是80端口，就需要这个回源，比如你配2082，这里你就需要回源到2082端口。）
+ ```
+      主机名 等于 你的域名 and SSL/HTTPS 等于 true
+      重写 端口 收件人 2082
+```
+2.3 cf盾的2个参数：Site Key和Secret Key
+2.3.1 cf主页面左侧菜单，“应用程序安全”--->Turnstile,选择添加小组件, 添加主机名（也就是选定域名）和小组件模式选"托管"（第一项）。
+
+      
 
 ---
 
