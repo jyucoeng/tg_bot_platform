@@ -202,7 +202,7 @@ Bot: ✅ 已将用户 111111 从黑名单移除
 ### 获取帮助
 
 - 📖 查看完整文档（本README）
-- [开发者](https://t.me/SerokBot_bot)
+- [感谢开发者](https://t.me/doraemon0000000001Bot)
 
 ### 报告问题
 
