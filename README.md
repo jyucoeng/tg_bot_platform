@@ -1,6 +1,6 @@
 # Telegram 多机器人托管平台，一键安装/卸载(安装后默认开启自启后台运行)
 ```bash
-bash <(curl -Ls https://raw.githubusercontent.com/jyucoeng/tg_bot_platform/refs/heads/main/setup.sh)
+bash <(curl -Ls https://raw.githubusercontent.com/jyucoeng/tg_bot_platform/refs/heads/v2.0.2/setup.sh)
 ```
 > 一键部署，轻松管理多个 Telegram 客服机器人
 > 项目运营中心
@@ -14,7 +14,7 @@ bash <(curl -Ls https://raw.githubusercontent.com/jyucoeng/tg_bot_platform/refs/
 
 - 🤖 **多机器人管理** - 一个平台管理无数个客服机器人
 - 💬 **双模式支持** - 直接转发模式 / 话题群组模式
-- 🔐 **智能验证** - 5种验证码类型，有效防止垃圾消息
+- 🔐 **智能验证** - 6种验证码类型，有效防止垃圾消息  （新增CF验证模式）
 - 📣 **自定义欢迎语** - SQLite 数据库存储，支持自动备份   （新增）
 - 📊 **用户管理** - 查看、拉黑、解除拉黑用户
 - 💾 **数据持久化** - SQLite 数据库存储，支持自动备份
@@ -202,7 +202,7 @@ Bot: ✅ 已将用户 111111 从黑名单移除
 ### 获取帮助
 
 - 📖 查看完整文档（本README）
-- [感谢开发者](https://t.me/SerokBot_bot)
+- [开发者](https://t.me/SerokBot_bot)
 
 ### 报告问题
 
@@ -225,10 +225,17 @@ MIT License - 自由使用，保留版权声明
 
 ## 🎯 版本信息
 
-- **当前版本**: v2.0
+- **当前版本**: v2.0.2
 - **更新日期**: 2025-11-18
 - **数据库版本**: SQLite 3
 - **Python版本**: 3.11+
+
+
+- v2.0.1 
+ 1. 完成版
+
+- v2.0.2 
+  1. 增加cf验证（用于防止广告分子跳过机器人平台 直接往bot塞广告）
 
 ---
 
