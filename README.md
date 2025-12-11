@@ -126,7 +126,27 @@ Bot: 📋 黑名单列表：
 
 你: /ub 111111
 Bot: ✅ 已将用户 111111 从黑名单移除
+
 ```
+
+**场景4：切换验证场景**
+
+<img width="940" height="472" alt="image" src="https://github.com/user-attachments/assets/b926e008-eb09-4076-8c4f-2d8c47b9c278" />
+
+<img width="950" height="200" alt="image" src="https://github.com/user-attachments/assets/18783de2-24a5-4192-96f2-1abe755e26dd" />
+
+<img width="966" height="690" alt="image" src="https://github.com/user-attachments/assets/5fea6ade-486b-4f6e-b3a9-5e43bed839f9" />
+
+<img width="409" height="544" alt="image" src="https://github.com/user-attachments/assets/950625fe-d2cb-418b-bf15-bdc64c51f63c" />
+
+
+```
+文字版教程：
+ /start—>点击“我的机器人”—>进入你的机器人名字—>点击验证设置—>可切换简单验证或者cf验证
+
+```
+
+
 
 ## 👑 管理员功能
 
