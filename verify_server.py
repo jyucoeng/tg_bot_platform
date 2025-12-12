@@ -21,19 +21,20 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 # Flask app初始化
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates')
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key-here')
 
 # CF Turnstile 配置
 CF_SITE_KEY = os.environ.get('CF_TURNSTILE_SITE_KEY')
 CF_SECRET_KEY = os.environ.get('CF_TURNSTILE_SECRET_KEY')
 VERIFY_SERVER_URL = os.environ.get('VERIFY_SERVER_URL', 'http://localhost:5000')
+VERIFY_SERVER_PORT = int(os.environ.get('VERIFY_SERVER_PORT', 5000))
 
 # Telegram Bot Token（用于发送通知）
 MANAGER_TOKEN = os.environ.get('MANAGER_TOKEN')
 
 if not CF_SITE_KEY or not CF_SECRET_KEY:
-    logger.error("❌ 缺少 CF Turnstile 配置！请设置环境变量 CF_TURNSTILE_SITE_KEY 和 CF_TURNSTILE_SECRET_KEY")
+    logger.warning("⚠️  缺少 CF Turnstile 配置！请设置环境变量 CF_TURNSTILE_SITE_KEY 和 CF_TURNSTILE_SECRET_KEY")
 
 
 @app.route('/verify/<token>', methods=['GET'])
@@ -200,59 +201,36 @@ def send_welcome_and_notify(bot_username: str, user_id: int, user_name: str, use
                         chat_id=user_id,
                         message_id=token_info['message_id']
                     )
-                    logger.info(f"✅ 已删除验证消息: {token_info['message_id']}")
                 except Exception as e:
                     logger.warning(f"删除验证消息失败: {e}")
             
             # 2. 发送欢迎消息给用户
-            await bot.send_message(
-                chat_id=user_id,
-                text=welcome_msg,
-                parse_mode="HTML"
-            )
-            logger.info(f"✅ 已发送欢迎消息给用户: {user_id}")
+            try:
+                await bot.send_message(
+                    chat_id=user_id,
+                    text=welcome_msg,
+                    parse_mode='HTML'
+                )
+            except Exception as e:
+                logger.error(f"发送欢迎消息失败: {e}")
             
             # 3. 通知 Bot 主人
-            await bot.send_message(
-                chat_id=owner_id,
-                text=notification_text,
-                parse_mode="HTML"
-            )
-            logger.info(f"✅ 已通知 Bot 主人: {owner_id}")
+            try:
+                await bot.send_message(
+                    chat_id=owner_id,
+                    text=notification_text,
+                    parse_mode='HTML'
+                )
+            except Exception as e:
+                logger.error(f"发送通知消息失败: {e}")
         
-        # 运行异步任务
+        # 运行异步函数
         asyncio.run(send_messages())
+        
     except Exception as e:
-        logger.error(f"发送欢迎/通知失败: {e}")
-        import traceback
-        traceback.print_exc()
-
-
-@app.route('/health', methods=['GET'])
-def health_check():
-    """健康检查端点"""
-    return {'status': 'ok', 'service': 'CF Verification Server'}, 200
-
-
-@app.errorhandler(404)
-def not_found(error):
-    return render_template('error.html',
-                         error_message="页面未找到",
-                         error_detail="请检查链接是否正确"), 404
-
-
-@app.errorhandler(500)
-def internal_error(error):
-    return render_template('error.html',
-                         error_message="服务器内部错误",
-                         error_detail="请稍后重试或联系管理员"), 500
+        logger.error(f"发送消息失败: {e}")
 
 
 if __name__ == '__main__':
-    # 开发模式
-    port = int(os.environ.get('VERIFY_SERVER_PORT', 5000))
-    logger.info(f"🚀 CF 验证服务器启动中...")
-    logger.info(f"📍 监听端口: {port}")
-    logger.info(f"🔗 验证 URL: {VERIFY_SERVER_URL}")
-    
-    app.run(host='0.0.0.0', port=port, debug=True)
+    # 启动 Flask 应用
+    app.run(host='0.0.0.0', port=VERIFY_SERVER_PORT, debug=False)
