@@ -3,7 +3,7 @@ version: '3.8'
 services:
   tg-bot-host:
     # 使用预构建镜像（推荐）
-    image: ghcr.io/jyucoeng/tg_bot_platform:latest
+    image: ghcr.io/hsiangyu/tg_bot_platform:latest
     # 如果需要本地构建，注释上面的 image 并取消注释下面的 build
     # build: .
     
@@ -46,7 +46,7 @@ services:
 
   tg-verify-server:
     # 使用预构建镜像（推荐）
-    image: ghcr.io/jyucoeng/tg_bot_platform:latest
+    image: ghcr.io/hsiangyu/tg_bot_platform:latest
     # 如果需要本地构建，注释上面的 image 并取消注释下面的 build
     # build: .
     
