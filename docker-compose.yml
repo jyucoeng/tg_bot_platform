@@ -13,13 +13,20 @@ services:
     # 环境变量配置（直接在这里修改）
     environment:
       # ========== 必需配置 ==========
-      # 1. 管理机器人 Token（从 @BotFather 获取）
       MANAGER_TOKEN: "YOUR_BOT_TOKEN_HERE"
-      
-      # 2. 管理员频道/群组 ID（接收通知的频道/群组）
+      #ADMIN_CHANNEL 为
       ADMIN_CHANNEL: "-1001234567890"
       
-      # ========== 可选配置 ==========
+      # ========== 验证服务器配置 ==========
+      #此处建议配置80系端口，如2052、2082、2086、2095、8080、8880（具体跟你cf里面配置回源的端口号一致）
+      VERIFY_SERVER_URL: "http://localhost:5000"
+      
+      # ========== CF 验证配置 ==========
+      # Cloudflare Turnstile 配置（如需启用 CF 验证，取消注释并填写）
+      # CF_TURNSTILE_SITE_KEY: "your_site_key"
+      # CF_TURNSTILE_SECRET_KEY: "your_secret_key"
+      
+      # ========== GitHub 自动备份配置 ==========
       # GitHub 自动备份配置（如需备份到 GitHub，取消注释并填写）
       # GH_USERNAME: "your_github_username"
       # GH_REPO: "tg-bot-backup"
@@ -53,22 +60,31 @@ services:
     container_name: tg_verify_server
     restart: unless-stopped
     
-    # 端口映射（CF验证服务器需要外部访问）
+    # 端口映射（CF验证服务器需要外部访问，修改全面的端口为80系端口，也就是你cf里面配置的回源端口，如2052、2082、2086、2095、8080、8880）
     ports:
       - "80:5000"
     
-    # 环境变量配置
+    # 环境变量配置（与host服务保持一致）
     environment:
       # ========== 必需配置 ==========
-      # 管理机器人 Token（与host服务保持一致）
+      # ========== bot的api token 和宿主tg id ==========
       MANAGER_TOKEN: "YOUR_BOT_TOKEN_HERE"
+      ADMIN_CHANNEL: "-1001234567890"
+      
+      # ========== 验证服务器配置 ==========
+      VERIFY_SERVER_URL: "http://localhost:5000"
+      VERIFY_SERVER_PORT: 5000
       
       # ========== CF 验证配置 ==========
       # Cloudflare Turnstile 配置（如需启用 CF 验证，取消注释并填写）
       # CF_TURNSTILE_SITE_KEY: "your_site_key"
       # CF_TURNSTILE_SECRET_KEY: "your_secret_key"
-      # VERIFY_SERVER_URL: "http://localhost"
-      # VERIFY_SERVER_PORT: 5000
+      
+      # ========== GitHub 自动备份配置 ==========
+      # GitHub 自动备份配置（如需备份到 GitHub，取消注释并填写）
+      # GH_USERNAME: "your_github_username"
+      # GH_REPO: "tg-bot-backup"
+      # GH_TOKEN: "ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
     # 数据卷挂载（共享数据库）
     volumes:
