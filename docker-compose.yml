@@ -17,7 +17,7 @@ services:
       ADMIN_CHANNEL: "6714871053"
       
       # ========== 验证服务器配置 ==========
-      VERIFY_SERVER_URL: "https://littledoraemon.z2002.hidns.co:2082"
+      VERIFY_SERVER_URL: "https://littledoraemon.z2002.hidns.co"
       
       # ========== CF 验证配置 ==========
       CF_TURNSTILE_SITE_KEY: "0x4AAAAAACGPjtDuU4lAW982"
