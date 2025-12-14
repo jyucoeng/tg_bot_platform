@@ -17,11 +17,11 @@ services:
       ADMIN_CHANNEL: "6714871053"
       
       # ========== 验证服务器配置 ==========
-      VERIFY_SERVER_URL: "https://littledoraemon.z2002.hidns.co"
+      VERIFY_SERVER_URL: "https://littledoraemon.xx66.nyc.mn"
       
       # ========== CF 验证配置 ==========
-      CF_TURNSTILE_SITE_KEY: "0x4AAAAAACGPjtDuU4lAW982"
-      CF_TURNSTILE_SECRET_KEY: "0x4AAAAAACGPjupEGNzQIhuxeeGqQx9Yy58"
+      CF_TURNSTILE_SITE_KEY: "0x4AAAAAACGANzuyx-vavzJS"
+      CF_TURNSTILE_SECRET_KEY: "0x4AAAAAACGAN0wEO2pUQ-KuLqkeHeFOJT4"
       
       # ========== GitHub 自动备份配置 ==========
       GH_USERNAME: "jyucoeng"
@@ -67,12 +67,12 @@ services:
       ADMIN_CHANNEL: "6714871053"
       
       # ========== 验证服务器配置 ==========
-      VERIFY_SERVER_URL: "https://littledoraemon.z2002.hidns.co"
+      VERIFY_SERVER_URL: "https://littledoraemon.xx66.nyc.mn"
       VERIFY_SERVER_PORT: 2082
       
       # ========== CF 验证配置 ==========
-      CF_TURNSTILE_SITE_KEY: "0x4AAAAAACGPjtDuU4lAW982"
-      CF_TURNSTILE_SECRET_KEY: "0x4AAAAAACGPjupEGNzQIhuxeeGqQx9Yy58"
+      CF_TURNSTILE_SITE_KEY: "0x4AAAAAACGANzuyx-vavzJS"
+      CF_TURNSTILE_SECRET_KEY: "0x4AAAAAACGAN0wEO2pUQ-KuLqkeHeFOJT4"
       
       # ========== GitHub 自动备份配置 ==========
       GH_USERNAME: "jyucoeng"
