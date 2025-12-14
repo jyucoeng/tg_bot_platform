@@ -14,24 +14,24 @@ services:
     environment:
       # ========== 必需配置 ==========
       # 为管理机器人的api token
-      MANAGER_TOKEN: "8539478673:AAFLdWNA0OnpU94u1vUjOvrYF2YXog1PSQI"
+      MANAGER_TOKEN: "YOUR_BOT_TOKEN_HERE"
       #ADMIN_CHANNEL 为频道id时为负数，为管理者的tg id为正数
-      ADMIN_CHANNEL: "6714871053"
+      ADMIN_CHANNEL: "-1001234567890"
       
       # ========== 验证服务器配置 ==========
       #此处建议配置80系端口，如2052、2082、2086、2095、8080、8880（具体跟你cf里面配置回源的端口号一致）
-      VERIFY_SERVER_URL: "https://dora.dingdang.pp.ua"
+      VERIFY_SERVER_URL: "https://dora.xxxx.com"
       
       # ========== CF 验证配置 ==========
       # Cloudflare Turnstile 配置（如需启用 CF 验证，取消注释并填写）
-      CF_TURNSTILE_SITE_KEY: "0x4AAAAAACGPjtDuU4lAW982"
-      CF_TURNSTILE_SECRET_KEY: "0x4AAAAAACGPjupEGNzQIhuxeeGqQx9Yy58"
+      CF_TURNSTILE_SITE_KEY: "0x4Axxxxxxxxxxxxxxxxx"
+      CF_TURNSTILE_SECRET_KEY: "0x4XXXXXXXXXXxxxxxxxxxxxxxxxx"
       
       # ========== GitHub 自动备份配置 ==========
       # GitHub 自动备份配置（如需备份到 GitHub，取消注释并填写）
-      GH_USERNAME: "jyucoeng"
-      GH_REPO: "TG_Talk_backup_test"
-      GH_TOKEN: "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"
+      GH_USERNAME: "你的github用户名"
+      GH_REPO: "你的github仓库名字"
+      GH_TOKEN: "ghp_token很长的一串"
 
     # 数据卷挂载（持久化数据库）
     volumes:
@@ -70,24 +70,24 @@ services:
       # ========== 必需配置 ==========
       # ========== bot的api token 和宿主tg id ==========
       # 为管理机器人的api token
-      MANAGER_TOKEN: "8539478673:AAFLdWNA0OnpU94u1vUjOvrYF2YXog1PSQI"
+      MANAGER_TOKEN: "YOUR_BOT_TOKEN_HERE"
       #ADMIN_CHANNEL 为频道id时为负数，为管理者的tg id为正数
-      ADMIN_CHANNEL: "6714871053"
+      ADMIN_CHANNEL: "1001234567890"
       
       # ========== 验证服务器配置 ==========
-      VERIFY_SERVER_URL: "https://dora.dingdang.pp.ua"
+      VERIFY_SERVER_URL: "https://dora.xxxx.com"
       VERIFY_SERVER_PORT: 2082
       
       # ========== CF 验证配置 ==========
       # Cloudflare Turnstile 配置（如需启用 CF 验证，取消注释并填写）
-      CF_TURNSTILE_SITE_KEY: "0x4AAAAAACGPjtDuU4lAW982"
-      CF_TURNSTILE_SECRET_KEY: "0x4AAAAAACGPjupEGNzQIhuxeeGqQx9Yy58"
+      CF_TURNSTILE_SITE_KEY: "0x4Axxxxxxxxxxxxxxxxx"
+      CF_TURNSTILE_SECRET_KEY: "0x4XXXXXXXXXXxxxxxxxxxxxxxxxx"
       
       # ========== GitHub 自动备份配置 ==========
       # GitHub 自动备份配置（如需备份到 GitHub，取消注释并填写）
-      GH_USERNAME: "jyucoeng"
-      GH_REPO: "TG_Talk_backup_test"
-      GH_TOKEN: "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"
+      GH_USERNAME: "你的github用户名"
+      GH_REPO: "你的github仓库名字"
+      GH_TOKEN: "ghp_token很长的一串"
 
     # 数据卷挂载（共享数据库）
     volumes:
