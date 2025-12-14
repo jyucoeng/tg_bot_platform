@@ -13,24 +13,20 @@ services:
     # 环境变量配置（直接在这里修改）
     environment:
       # ========== 必需配置 ==========
-      MANAGER_TOKEN: "YOUR_BOT_TOKEN_HERE"
-      #ADMIN_CHANNEL 为
-      ADMIN_CHANNEL: "-1001234567890"
+      MANAGER_TOKEN: "8539478673:AAFLdWNA0OnpU94u1vUjOvrYF2YXog1PSQI"
+      ADMIN_CHANNEL: "6714871053"
       
       # ========== 验证服务器配置 ==========
-      #此处建议配置80系端口，如2052、2082、2086、2095、8080、8880（具体跟你cf里面配置回源的端口号一致）
-      VERIFY_SERVER_URL: "http://localhost:5000"
+      VERIFY_SERVER_URL: "https://littledoraemon.z2002.hidns.co:2082"
       
       # ========== CF 验证配置 ==========
-      # Cloudflare Turnstile 配置（如需启用 CF 验证，取消注释并填写）
-      # CF_TURNSTILE_SITE_KEY: "your_site_key"
-      # CF_TURNSTILE_SECRET_KEY: "your_secret_key"
+      CF_TURNSTILE_SITE_KEY: "0x4AAAAAACGPjtDuU4lAW982"
+      CF_TURNSTILE_SECRET_KEY: "0x4AAAAAACGPjupEGNzQIhuxeeGqQx9Yy58"
       
       # ========== GitHub 自动备份配置 ==========
-      # GitHub 自动备份配置（如需备份到 GitHub，取消注释并填写）
-      # GH_USERNAME: "your_github_username"
-      # GH_REPO: "tg-bot-backup"
-      # GH_TOKEN: "ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      GH_USERNAME: "jyucoeng"
+      GH_REPO: "TG_Talk_backup_test"
+      GH_TOKEN: "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"
 
     # 数据卷挂载（持久化数据库）
     volumes:
@@ -60,31 +56,28 @@ services:
     container_name: tg_verify_server
     restart: unless-stopped
     
-    # 端口映射（CF验证服务器需要外部访问，修改全面的端口为80系端口，也就是你cf里面配置的回源端口，如2052、2082、2086、2095、8080、8880）
+    # 端口映射（CF验证服务器需要外部访问）
     ports:
-      - "80:5000"
+      - "2082:5000"
     
     # 环境变量配置（与host服务保持一致）
     environment:
       # ========== 必需配置 ==========
-      # ========== bot的api token 和宿主tg id ==========
-      MANAGER_TOKEN: "YOUR_BOT_TOKEN_HERE"
-      ADMIN_CHANNEL: "-1001234567890"
+      MANAGER_TOKEN: "8539478673:AAFLdWNA0OnpU94u1vUjOvrYF2YXog1PSQI"
+      ADMIN_CHANNEL: "6714871053"
       
       # ========== 验证服务器配置 ==========
-      VERIFY_SERVER_URL: "http://localhost:5000"
-      VERIFY_SERVER_PORT: 5000
+      VERIFY_SERVER_URL: "https://littledoraemon.z2002.hidns.co"
+      VERIFY_SERVER_PORT: 2082
       
       # ========== CF 验证配置 ==========
-      # Cloudflare Turnstile 配置（如需启用 CF 验证，取消注释并填写）
-      # CF_TURNSTILE_SITE_KEY: "your_site_key"
-      # CF_TURNSTILE_SECRET_KEY: "your_secret_key"
+      CF_TURNSTILE_SITE_KEY: "0x4AAAAAACGPjtDuU4lAW982"
+      CF_TURNSTILE_SECRET_KEY: "0x4AAAAAACGPjupEGNzQIhuxeeGqQx9Yy58"
       
       # ========== GitHub 自动备份配置 ==========
-      # GitHub 自动备份配置（如需备份到 GitHub，取消注释并填写）
-      # GH_USERNAME: "your_github_username"
-      # GH_REPO: "tg-bot-backup"
-      # GH_TOKEN: "ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      GH_USERNAME: "jyucoeng"
+      GH_REPO: "TG_Talk_backup_test"
+      GH_TOKEN: "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"
 
     # 数据卷挂载（共享数据库）
     volumes:
