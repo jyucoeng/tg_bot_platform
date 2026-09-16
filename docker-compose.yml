@@ -1,6 +1,9 @@
-version: '3.8'
+# ============================================================
+#  Telegram 多 Bot 托管平台 - Docker Compose 配置
+#  镜像由 GitHub Actions 自动构建并推送到 ghcr.io (GitHub Package)
+# ============================================================
 
-# Common configurations used across multiple services
+# ---------- 公共服务配置（两个服务共用）----------
 x-common-service-config: &common-service-config
   restart: unless-stopped
   volumes:
@@ -17,53 +20,41 @@ x-common-service-config: &common-service-config
     retries: 3
     start_period: 40s
 
-# Shared environment variables (common across both tg-bot-host and tg-verify-server)
+# ---------- 公共环境变量（tg-bot-host 与 tg-verify-server 都需要）----------
 x-common-environment: &common-environment
-  - MANAGER_TOKEN=${MANAGER_TOKEN}  # 为管理机器人的api token
-  - ADMIN_CHANNEL=${ADMIN_CHANNEL}  #ADMIN_CHANNEL 为频道id时为负数，如-1001234567890，为管理者的tg id为正数
-  - GH_USERNAME=${GH_USERNAME}     #你的github用户名 
-  - GH_REPO=${GH_REPO}             #你的github仓库名字
-  - GH_TOKEN=${GH_TOKEN}           #ghp_token很长的一串
+  MANAGER_TOKEN: "${MANAGER_TOKEN}"            # 管理机器人 API Token
+  ADMIN_CHANNEL: "${ADMIN_CHANNEL}"            # 管理员频道/群组 ID（负数为频道id，正数为管理员tg id）
+  GH_USERNAME: "${GH_USERNAME}"                # GitHub 用户名（备份用）
+  GH_REPO: "${GH_REPO}"                        # GitHub 仓库名（备份用）
+  GH_TOKEN: "${GH_TOKEN}"                      # GitHub Token（备份用）
+  VERIFY_SERVER_URL: "${VERIFY_SERVER_URL}"    # 验证服务器公开域名，host 用它拼接验证链接
 
-# Specific environment variables for tg-verify-server
+# ---------- verify 服务器专属环境变量 ----------
 x-verify-server-environment: &verify-server-environment
-  - CF_TURNSTILE_SITE_KEY=${CF_TURNSTILE_SITE_KEY}          ## Cloudflare Turnstile 配置（如需启用 CF 验证，请填写填写）
-  - CF_TURNSTILE_SECRET_KEY=${CF_TURNSTILE_SECRET_KEY}      ## Cloudflare Turnstile 配置（如需启用 CF 验证，请填写填写）
-  - VERIFY_SERVER_URL=${VERIFY_SERVER_URL}    #验证服务器配置,必须是域名,如https://dora.xxxx.com，可以不写端口号
-  - VERIFY_SERVER_PORT=${VERIFY_SERVER_PORT}  # This is the environment variable for the port ,如 2082
-
-# Shared build flag for local build
-x-build-locally: &build-locally
-  BUILD_LOCALLY: "true"  # Control local build, set to true to build locally  假如你想本地构建，请设置为true，直接用线上的镜像就用false，一般不用用户自己配，是开发者配的
+  CF_TURNSTILE_SITE_KEY: "${CF_TURNSTILE_SITE_KEY}"        # CF Turnstile Site Key（可选）
+  CF_TURNSTILE_SECRET_KEY: "${CF_TURNSTILE_SECRET_KEY}"    # CF Turnstile Secret Key（可选）
 
 services:
+  # ---------- 1. Bot 托管服务（默认运行 host）----------
   tg-bot-host:
-    <<: *common-service-config  # Merge common configuration
-    build:
-      context: ./  # Build context for local builds
-      dockerfile: Dockerfile  # Specify the Dockerfile (if needed)
-      args:
-        <<: *build-locally  # Use the build-locally variable for local build control
-    image: ghcr.io/jyucoeng/tg_bot_platform:latest  # Default to registry image
+    <<: *common-service-config
+    image: ghcr.io/jyucoeng/tg_bot_platform:latest
     container_name: tg_multi_bot
     environment:
-      <<: *common-environment  # Use shared environment variables (for tg-bot-host)
-    # No need to expose ports for tg-bot-host since it's just a bot host service (no direct interaction)
+      <<: *common-environment
+    # 未指定 command，使用镜像默认 CMD (host) -> 运行 host_bot.py
+    # 无需暴露端口（bot 通过长轮询/出站请求工作）
 
+  # ---------- 2. 验证服务器（command: verify -> 运行 verify_server.py）----------
   tg-verify-server:
-    <<: *common-service-config  # Merge common configuration
-    build:
-      context: ./  # Build context for local builds
-      dockerfile: Dockerfile  # Specify the Dockerfile (if needed)
-      args:
-        <<: *build-locally  # Use the build-locally variable for local build control
-    image: ghcr.io/jyucoeng/tg_bot_platform:latest  # Default to registry image
+    <<: *common-service-config
+    image: ghcr.io/jyucoeng/tg_bot_platform:latest
     container_name: tg_verify_server
+    command: ["verify"]
     environment:
-      <<: *common-environment  # Use shared environment variables
-      <<: *verify-server-environment  # Use specific environment variables for tg-verify-server
+      <<: *common-environment
+      <<: *verify-server-environment
     ports:
-      - "${VERIFY_SERVER_PORT}:5000"  # Use VERIFY_SERVER_PORT for host port and container port is fixed at 5000
-
-volumes:
-  postgres_data:
+      # 宿主端口 ${VERIFY_SERVER_PORT} 映射到容器 5000（verify 固定监听 5000）
+      # 注意：不要在容器内注入 VERIFY_SERVER_PORT，否则应用会绑定到该端口导致对不上
+      - "${VERIFY_SERVER_PORT}:5000"

@@ -10,13 +10,10 @@ RUN apt-get update && \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# 复制依赖文件并安装 Python 依赖
+# 复制依赖文件并安装 Python 依赖（版本以 requirements.txt 为准）
+COPY requirements.txt /app/
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir \
-    python-telegram-bot==20.7 \
-    python-dotenv \
-    flask \
-    requests
+    pip install --no-cache-dir -r /app/requirements.txt
 
 # 复制应用程序文件
 COPY host_bot.py /app/

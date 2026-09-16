@@ -1,0 +1,11 @@
+# 推送构建上下文时排除的敏感/冗余文件
+.git
+.env
+data
+*.md
+.github
+docker-compose.yml
+docker-build.yml
+env.example
+setup.sh
+docker-start.sh
