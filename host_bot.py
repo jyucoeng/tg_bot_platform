@@ -519,6 +519,17 @@ async def subbot_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             bot_info = db.get_bot(bot_username)
             owner_id = bot_info['owner'] if bot_info else 0
             await request_manual_verification(context, update.message, bot_username, owner_id)
+        elif verification_type == 'deny':
+            # 自动拒绝：拒绝所有新用户
+            await update.message.reply_text(
+                "⛔ 该机器人暂不接受新用户，已拒绝你的访问。\n\n"
+                "如果你是已有用户，请联系管理员。",
+                parse_mode="HTML"
+            )
+        elif verification_type == 'none':
+            # 取消验证：所有用户直接放行
+            welcome_msg = get_welcome_message(bot_username)
+            await update.message.reply_text(welcome_msg)
         else:
             # 简单验证码流程（原有逻辑）
             captcha_data = generate_captcha()
@@ -593,6 +604,8 @@ def build_verify_settings(bot_username: str, current_type: str):
         'simple': "简单验证码",
         'cf': "Cloudflare 验证",
         'manual': "人工验证",
+        'deny': "自动拒绝所有验证",
+        'none': "取消验证",
     }
     verify_type_label = verify_type_labels.get(current_type, "简单验证码")
     
@@ -615,6 +628,18 @@ def build_verify_settings(bot_username: str, current_type: str):
                 callback_data=f"verify_manual_{bot_username}"
             )
         ],
+        [
+            InlineKeyboardButton(
+                f"{'✅ ' if current_type == 'deny' else ''}自动拒绝所有验证",
+                callback_data=f"verify_deny_{bot_username}"
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                f"{'✅ ' if current_type == 'none' else ''}取消验证",
+                callback_data=f"verify_none_{bot_username}"
+            )
+        ],
         [InlineKeyboardButton("🔙 返回", callback_data=f"info_{bot_username}")]
     ]
     
@@ -632,7 +657,13 @@ def build_verify_settings(bot_username: str, current_type: str):
         f"• 更强的安全性\n\n"
         f"🔹 人工验证\n"
         f"• 管理员手动审核\n"
-        f"• 严格控制用户准入\n"
+        f"• 严格控制用户准入\n\n"
+        f"🔹 自动拒绝所有验证\n"
+        f"• 拒绝所有新用户进入\n"
+        f"• 仅已有验证用户可用\n\n"
+        f"🔹 取消验证\n"
+        f"• 所有用户无需验证\n"
+        f"• 直接使用\n"
         f"━━━━━━━━━━━━━━\n\n"
         f"点击下方按钮切换验证方式："
     )
@@ -1010,12 +1041,23 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE, own
             
             logger.info(f"[验证检查] Bot: @{bot_username}, 用户: {user_id}, 已验证: {is_verified(bot_username, user_id)}")
             
-            # 如果用户未验证
-            if not is_verified(bot_username, user_id):
-                # 获取 Bot 配置以确定验证类型
-                bot_info = db.get_bot(bot_username)
-                verification_type = bot_info.get('verification_type', 'simple') if bot_info else 'simple'
-                
+            # 获取 Bot 配置以确定验证类型
+            bot_info = db.get_bot(bot_username)
+            verification_type = bot_info.get('verification_type', 'simple') if bot_info else 'simple'
+            
+            # 自动拒绝模式：拒绝所有未验证用户
+            if verification_type == 'deny' and not is_verified(bot_username, user_id):
+                await reply_and_auto_delete(
+                    message,
+                    "⛔ 该机器人暂不接受新用户，已拒绝你的访问。\n\n"
+                    "如果你是已有用户，请联系管理员。",
+                    delay=5
+                )
+                logger.info(f"[拒绝] 用户 {user_id} 被拒绝 (@{bot_username}) - deny 模式")
+                return
+            
+            # 如果用户未验证（取消验证模式直接放行）
+            if not is_verified(bot_username, user_id) and verification_type != 'none':
                 # 如果是 CF 验证模式
                 if verification_type == 'cf':
                     # CF 模式下，用户发送任何文本（除了命令）都视为未验证，直接提示验证
@@ -2427,6 +2469,72 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         # 刷新菜单显示（更新勾选状态）
         info_text, keyboard = build_verify_settings(bot_username, 'manual')
+        await query.edit_message_text(
+            text=info_text,
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
+        return
+
+    # 切换到自动拒绝所有验证
+    if data.startswith("verify_deny_"):
+        bot_username = data.split("_", 2)[2]
+        owner_id = str(query.from_user.id)
+        
+        # 验证权限
+        bots = bots_data.get(owner_id, {}).get("bots", [])
+        target_bot = next((b for b in bots if b["bot_username"] == bot_username), None)
+        if not target_bot:
+            await query.answer("⚠️ 找不到这个 Bot", show_alert=True)
+            return
+        
+        # 检查是否已经是自动拒绝
+        current_type = target_bot.get('verification_type', 'simple')
+        if current_type == 'deny':
+            await query.answer("ℹ️ 当前已经是自动拒绝模式", show_alert=False)
+            return
+        
+        # 更新数据库
+        db.update_bot_verification_type(bot_username, 'deny')
+        # 更新内存
+        target_bot['verification_type'] = 'deny'
+        
+        await query.answer("✅ 已切换到自动拒绝所有验证", show_alert=True)
+        
+        # 刷新菜单显示（更新勾选状态）
+        info_text, keyboard = build_verify_settings(bot_username, 'deny')
+        await query.edit_message_text(
+            text=info_text,
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
+        return
+
+    # 切换到取消验证
+    if data.startswith("verify_none_"):
+        bot_username = data.split("_", 2)[2]
+        owner_id = str(query.from_user.id)
+        
+        # 验证权限
+        bots = bots_data.get(owner_id, {}).get("bots", [])
+        target_bot = next((b for b in bots if b["bot_username"] == bot_username), None)
+        if not target_bot:
+            await query.answer("⚠️ 找不到这个 Bot", show_alert=True)
+            return
+        
+        # 检查是否已经是取消验证
+        current_type = target_bot.get('verification_type', 'simple')
+        if current_type == 'none':
+            await query.answer("ℹ️ 当前已经是取消验证模式", show_alert=False)
+            return
+        
+        # 更新数据库
+        db.update_bot_verification_type(bot_username, 'none')
+        # 更新内存
+        target_bot['verification_type'] = 'none'
+        
+        await query.answer("✅ 已切换到取消验证", show_alert=True)
+        
+        # 刷新菜单显示（更新勾选状态）
+        info_text, keyboard = build_verify_settings(bot_username, 'none')
         await query.edit_message_text(
             text=info_text,
             reply_markup=InlineKeyboardMarkup(keyboard)
