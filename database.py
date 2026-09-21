@@ -185,6 +185,30 @@ def init_database():
         except Exception:
             pass  # 列已存在
 
+        # 7. 人工验证申请表
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS manual_verifications (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                bot_username TEXT NOT NULL,
+                user_id INTEGER NOT NULL,
+                user_name TEXT DEFAULT '',
+                user_username TEXT DEFAULT '',
+                status TEXT DEFAULT 'pending',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                resolved_at TIMESTAMP
+            )
+        ''')
+
+        # 同一对 (bot, user) 同时只允许一条待审核申请；历史处理记录保留
+        try:
+            cursor.execute('''
+                CREATE UNIQUE INDEX IF NOT EXISTS idx_manual_pending
+                ON manual_verifications(bot_username, user_id)
+                WHERE status = 'pending'
+            ''')
+        except Exception as e:
+            logger.warning(f"⚠️ 创建人工验证唯一索引失败: {e}")
+
         
         # 6. 创建索引加速查询（独立语句）
         cursor.execute('''
@@ -1014,6 +1038,106 @@ def remove_pending_verification(bot_username: str, user_id: int) -> bool:
             return affected > 0
     except Exception as e:
         logger.error(f"❌ 移除待验证用户失败: {e}")
+        return False
+
+
+# ================== 人工验证管理 ==================
+
+def add_manual_verification(bot_username: str, user_id: int, user_name: str = '', user_username: str = '') -> bool:
+    """创建人工验证申请（同一用户已有待审核申请则跳过）"""
+    try:
+        with db_lock:
+            conn = get_connection()
+            cursor = conn.cursor()
+            
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS manual_verifications (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    bot_username TEXT NOT NULL,
+                    user_id INTEGER NOT NULL,
+                    user_name TEXT DEFAULT '',
+                    user_username TEXT DEFAULT '',
+                    status TEXT DEFAULT 'pending',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    resolved_at TIMESTAMP
+                )
+            ''')
+            
+            cursor.execute('''
+                INSERT INTO manual_verifications (bot_username, user_id, user_name, user_username, status)
+                SELECT ?, ?, ?, ?, 'pending'
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM manual_verifications
+                    WHERE bot_username = ? AND user_id = ? AND status = 'pending'
+                )
+            ''', (bot_username, user_id, user_name, user_username, bot_username, user_id))
+            
+            conn.commit()
+            affected = cursor.rowcount
+            conn.close()
+            
+            return affected > 0
+    except Exception as e:
+        logger.error(f"❌ 创建人工验证申请失败: {e}")
+        return False
+
+
+def get_pending_manual_verification(bot_username: str, user_id: int) -> Optional[Dict]:
+    """获取某用户待审核的人工验证申请"""
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS manual_verifications (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                bot_username TEXT NOT NULL,
+                user_id INTEGER NOT NULL,
+                user_name TEXT DEFAULT '',
+                user_username TEXT DEFAULT '',
+                status TEXT DEFAULT 'pending',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                resolved_at TIMESTAMP
+            )
+        ''')
+        
+        cursor.execute('''
+            SELECT * FROM manual_verifications
+            WHERE bot_username = ? AND user_id = ? AND status = 'pending'
+            ORDER BY id DESC LIMIT 1
+        ''', (bot_username, user_id))
+        
+        row = cursor.fetchone()
+        conn.close()
+        
+        if row:
+            return dict(row)
+        return None
+    except Exception as e:
+        logger.error(f"❌ 查询人工验证申请失败: {e}")
+        return None
+
+
+def resolve_manual_verification(bot_username: str, user_id: int, status: str) -> bool:
+    """处理人工验证申请（approved / rejected）"""
+    try:
+        with db_lock:
+            conn = get_connection()
+            cursor = conn.cursor()
+            
+            cursor.execute('''
+                UPDATE manual_verifications
+                SET status = ?, resolved_at = CURRENT_TIMESTAMP
+                WHERE bot_username = ? AND user_id = ? AND status = 'pending'
+            ''', (status, bot_username, user_id))
+            
+            conn.commit()
+            affected = cursor.rowcount
+            conn.close()
+            
+            return affected > 0
+    except Exception as e:
+        logger.error(f"❌ 处理人工验证申请失败: {e}")
         return False
 
 
